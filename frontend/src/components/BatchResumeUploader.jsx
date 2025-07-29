@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import Util from '../utils/utils.js';
+import Util from '../lib/utils.js';
+import api from '../lib/axios.js';
 
 // allow pdf and word
 const ALLOWED_TYPES = [
@@ -34,26 +35,49 @@ const BatchResumeUploader = () => {
 
   const handleUpload = async () => {
     if (resumes.length === 0) return;
-
     setUploading(true);
-    const status = {};
+    const newStatus = {};
 
-    for (let i = 0; i < resumes.length; i++) {
-      const file = resumes[i];
-      const fileKey = `${file.name}`;
+    for (const file of resumes) {
+      const { name, type } = file;
+      const fileKey = name;
 
       try {
-        await uploadResume(file);
-        status[fileKey] = 'Uploaded';
+        // Get pre-signed URL
+        const { data } = await api.get('/get-presigned-url', {
+          params: {
+            filename: name,
+            fileType: type
+          },
+        });
+
+        if (!data.url) { throw new Error('Failed to get pre-signed URL'); }
+
+        // Upload file to S3
+        const res = await fetch(data.url, {
+          method: 'PUT',
+          headers: { 'Content-Type': encodeURI(type) },
+          body: file,
+        });
+
+        if (!res.ok) { throw new Error(`Upload failed with status ${res.status}`); }
+        newStatus[fileKey] = 'Uploaded';
       } catch (err) {
-        setError(err); // TODO: get err string
-        status[fileKey] = 'Failed';
+        let errorMsg = 'An unknown error occurred.';
+
+        if (err.response) {
+          errorMsg = err.response.data?.message || `Server error: ${err.response.status}`;
+        } else if (err.request) {
+          errorMsg = 'No response from server. Check your network connection.';
+        } else {
+          errorMsg = err.message;
+        }
+        setError(errorMsg);
+        newStatus[fileKey] = 'Failed';
       }
-
-      // Update status progressively
-      setUploadStatus(prev => ({ ...prev, ...status }));
     }
-
+    setError("");
+    setUploadStatus(prev => ({ ...prev, ...newStatus }));
     setUploading(false);
   };
 
@@ -195,11 +219,6 @@ const BatchResumeUploader = () => {
       </div>
     </>
   );
-};
-
-// TODO: add file upload logic
-const uploadResume = (file) => {
-  console.log(file);
 };
 
 export default BatchResumeUploader;

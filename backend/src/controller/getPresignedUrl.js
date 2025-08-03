@@ -1,16 +1,13 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import dotenv from "dotenv";
-
-dotenv.config(); // load environment variables
-
-const region = process.env.AWS_REGION;
-const bucket_name = process.env.AWS_S3_BUCKET;
-
-const s3 = new S3Client({ region: region });
 
 export const generatePresignedUrl = async (req, res) => {
   const { filename, fileType } = req.query;
+  
+  const region = process.env.AWS_REGION;
+  const bucket_name = process.env.AWS_S3_BUCKET;
+  
+  const s3 = new S3Client({ region: region });
 
   if (!filename && !fileType) {
     return res.status(400).json({

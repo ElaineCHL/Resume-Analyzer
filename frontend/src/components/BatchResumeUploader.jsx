@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
+import toast from 'react-hot-toast';
 import Util from '../lib/utils.js';
 import api from '../lib/axios.js';
 
@@ -72,13 +73,26 @@ const BatchResumeUploader = () => {
         } else {
           errorMsg = err.message;
         }
-        setError(errorMsg);
+
         newStatus[fileKey] = 'Failed';
+        console.error(`Error uploading ${file.name}:`, errorMsg);
       }
     }
     setError("");
     setUploadStatus(prev => ({ ...prev, ...newStatus }));
     setUploading(false);
+
+    // toast summary
+    const uploadedCount = Object.values(newStatus).filter(status => status === 'Uploaded').length;
+    const failedCount = Object.values(newStatus).filter(status => status === 'Failed').length;
+
+    if (uploadedCount > 0 && failedCount === 0) {
+      toast.success(`${uploadedCount} file${uploadedCount > 1 ? 's' : ''} uploaded successfully.`);
+    } else if (failedCount > 0 && uploadedCount === 0) {
+      toast.error(`Failed to upload ${failedCount} file${failedCount > 1 ? 's' : ''}.`);
+    } else if (failedCount > 0 && uploadedCount > 0) {
+      toast(`Uploaded ${uploadedCount} succeeded, ${failedCount} failed.`, { icon: '⚠️' });
+    }
   };
 
   const removeFile = useCallback((fileName) => {
@@ -95,10 +109,6 @@ const BatchResumeUploader = () => {
     setResumes([]);
     setUploadStatus({});
   }, []);
-
-  const uploadedCount = Object.values(uploadStatus).filter(status => status === 'Uploaded').length;
-  const failedCount = Object.values(uploadStatus).filter(status => status === 'Failed').length;
-  const processedCount = Object.keys(uploadStatus).length;
 
   return (
     <>
@@ -194,26 +204,7 @@ const BatchResumeUploader = () => {
               >
                 Clear All
               </button>
-              {uploading && (
-                <small className="text-muted">
-                  Processing files...
-                </small>
-              )}
             </div>
-
-            {/* Summary */}
-            {processedCount > 0 && (
-              <div className="alert alert-info mb-0">
-                {uploadedCount > 0 && (
-                  <span>{uploadedCount} uploaded successfully</span>
-                )}
-                {failedCount > 0 && (
-                  <span className="text-danger ms-2">
-                    {failedCount} failed
-                  </span>
-                )}
-              </div>
-            )}
           </>
         )}
       </div>

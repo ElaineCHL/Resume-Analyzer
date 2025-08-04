@@ -44,7 +44,7 @@ export const generatePresignedUrl = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: "Failed to generate presigned URL. " + error
+      error: "Failed to generate presigned URL. " + error
     });
   }
 };

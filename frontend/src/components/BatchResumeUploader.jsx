@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import Util from '../lib/utils.js';
 import api from '../lib/axios.js';
 
@@ -44,11 +45,36 @@ const BatchResumeUploader = () => {
       const fileKey = name;
 
       try {
+        let pdfBlob = file;
+        let uploadName = name;
+
+        if (type !== 'application/pdf') {
+          // Convert DOC to PDF via backend
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const response = await api.post('/convert-doc-to-pdf', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            responseType: 'blob',
+            validateStatus: () => true
+          });
+
+          if (response.status >= 400) {
+            // Convert blob error to JSON
+            const text = await response.data.text();
+            const errorJson = JSON.parse(text);
+            throw new Error(errorJson.message || 'Conversion failed');
+          }
+
+          pdfBlob = new Blob([response.data], { type: 'application/pdf' });
+          uploadName = name.replace(/\.(docx?|DOCX?)$/, '.pdf');
+        }
+
         // Get pre-signed URL
         const { data } = await api.get('/get-presigned-url', {
           params: {
-            filename: name,
-            fileType: type
+            filename: uploadName,
+            fileType: pdfBlob.type
           },
         });
 
@@ -57,8 +83,8 @@ const BatchResumeUploader = () => {
         // Upload file to S3
         const res = await fetch(data.url, {
           method: 'PUT',
-          headers: { 'Content-Type': encodeURI(type) },
-          body: file,
+          headers: { 'Content-Type': encodeURI(pdfBlob.type) },
+          body: pdfBlob,
         });
 
         if (!res.ok) { throw new Error(`Upload failed with status ${res.status}`); }
@@ -66,19 +92,29 @@ const BatchResumeUploader = () => {
       } catch (err) {
         let errorMsg = 'An unknown error occurred.';
 
-        if (err.response) {
-          errorMsg = err.response.data?.message || `Server error: ${err.response.status}`;
-        } else if (err.request) {
-          errorMsg = 'No response from server. Check your network connection.';
+        if (axios.isAxiosError(err)) {
+          // Handle Axios-specific errors
+          if (err.code === 'ERR_NETWORK') {
+            errorMsg = 'Network error: Please check your internet connection';
+          } else if (err.response) {
+            // Server responded with an error status
+            errorMsg = err.response.data?.message || err.response.data?.error || errorMsg;
+          } else if (err.request) {
+            // Request was made but no response received
+            errorMsg = 'No response from server. Please try again later';
+          }
+        } else if (err instanceof TypeError) {
+          // Handle type errors (e.g., invalid data format)
+          errorMsg = 'Invalid data format detected';
         } else {
-          errorMsg = err.message;
+          // Handle other types of errors
+          errorMsg = err.message || errorMsg;
         }
-
+        // setError(errorMsg);
         newStatus[fileKey] = 'Failed';
-        console.error(`Error uploading ${file.name}:`, errorMsg);
+        toast.error(errorMsg);
       }
     }
-    setError("");
     setUploadStatus(prev => ({ ...prev, ...newStatus }));
     setUploading(false);
 

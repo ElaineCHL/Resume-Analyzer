@@ -113,13 +113,13 @@ const BatchResumeUploader = () => {
   }, []);
 
   return (
-    <div className="container my-5">
+    <div>
       {!Util.isEmptyString(error) && (
         <div className="alert alert-danger mt-2" role="alert">
           {error}
         </div>
       )}
-      <h3 className="mb-4">Batch Resume Uploader</h3>
+      <h3 className="mb-4">Upload Resumes</h3>
       <div className="mb-3">
         <label htmlFor="fileInput" className="form-label">
           Select Resume Files (PDF, DOC, DOCX)
@@ -182,7 +182,7 @@ const BatchResumeUploader = () => {
             </ul>
           </div>
 
-          <div className="d-flex gap-2 align-items-center mb-3">
+          <div className="d-flex gap-2 align-items-center">
             <button
               className="btn btn-primary"
               onClick={handleUpload}

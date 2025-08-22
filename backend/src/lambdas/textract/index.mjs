@@ -1,3 +1,4 @@
+import path from "path";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { extractTextFromS3, cleanLines, extractFieldsFromText } from './handler.mjs';
 
@@ -13,18 +14,18 @@ export const handler = async (event) => {
     const bucketname = fileObj.s3.bucket.name;
     const filename = decodeURIComponent(fileObj.s3.object.key.replace(/\+/g, " "));
 
-    console.log(`Bucket: ${bucketname} | Key: ${filename}`);
+    console.debug(`Bucket: ${bucketname} | Key: ${filename}`);
 
     const rawText = await extractTextFromS3(bucketname, filename);
     const cleaned = cleanLines(rawText);
     const structured = extractFieldsFromText(cleaned);
     const result = { filename, data: structured };
 
-    console.log("Extracted text:", structured);
+    console.debug("Extracted text:", structured);
 
-    // Build output file name (replace .pdf with .txt)
-    const baseName = filename.replace(/\.[^/.]+$/, ""); // remove extension
-    const outputKey = `output/${baseName}.txt`;
+    // Build output file name (replace .pdf with .json)
+    const baseName = path.basename(filename, path.extname(filename));
+    const outputKey = `output/${baseName}.json`;
 
     // Save to S3
     await s3.send(

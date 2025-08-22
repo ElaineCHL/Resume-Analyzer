@@ -24,6 +24,12 @@ const Navbar = () => {
               Home
             </Link>
             <Link
+              to="/job"
+              className={`btn ${isActive('/job') ? ' text-primary' : 'fw-light text-dark'} btn-link`}
+            >
+              Job
+            </Link>
+            <Link
               to="/about"
               className={`btn ${isActive('/about') ? ' text-primary' : 'fw-light text-dark'} btn-link`}
             >

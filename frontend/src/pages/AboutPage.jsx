@@ -1,8 +1,6 @@
-import React from "react";
-
 const AboutPage = () => {
   return (
-    <div className="container mt-3" style={{ minHeight: "100vh" }}>
+    <div className="container mt-4 min-vh-100">
       <h2 className="mb-4 text-center">About This Project</h2>
 
       <div className="mb-4">

@@ -7,7 +7,7 @@ export const generatePresignedUrl = async (req, res) => {
   const region = process.env.AWS_REGION;
   const bucket_name = process.env.AWS_S3_BUCKET;
   
-  const s3 = new S3Client({ region: region });
+  const s3 = new S3Client({ region });
 
   if (!filename && !fileType) {
     return res.status(400).json({

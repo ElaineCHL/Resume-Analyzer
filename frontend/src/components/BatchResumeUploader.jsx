@@ -49,14 +49,14 @@ const BatchResumeUploader = () => {
       const fileKey = name;
 
       try {
+        let uploadDir = 'uploads/';
         let pdfBlob = file;
-        let uploadName = name;
+        let uploadName = uploadDir + name;
 
         if (type !== 'application/pdf') {
           pdfBlob = await convertDocToPdf(file);
-          uploadName = name.replace(/\.(docx?|DOCX?)$/, '.pdf');
+          uploadName = uploadName.replace(/\.(docx?|DOCX?)$/, '.pdf');
         }
-
         const url = await getPresignedUrl(uploadName, pdfBlob.type);
         await uploadToS3(url, pdfBlob, pdfBlob.type);
 

@@ -41,7 +41,7 @@ const JobPage = () => {
         <div key={jobs.jobID} className="col-md-4 mb-4">
           <div className="card shadow-sm h-100">
             <div className="card-body">
-              <h5 className="card-title">{jobs.Title}</h5>
+              <h5 className="card-title">{jobs.title}</h5>
               <p className="card-text text-muted">Job ID: {jobs.jobID}</p>
 
               <h6 className="mt-3 text-secondary">Top 3 Candidates</h6>

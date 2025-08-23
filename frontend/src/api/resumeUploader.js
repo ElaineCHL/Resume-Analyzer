@@ -19,9 +19,9 @@ export async function convertDocToPdf(file) {
   return new Blob([response.data], { type: 'application/pdf' });
 }
 
-export async function getPresignedUrl(filename, fileType) {
+export async function getPresignedUrl(filename, fileType, jobId) {
   const { data } = await api.get('/get-presigned-url', {
-    params: { filename, fileType },
+    params: { filename, fileType, jobId },
   });
 
   if (!data.url) {

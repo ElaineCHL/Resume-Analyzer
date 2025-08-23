@@ -1,4 +1,9 @@
 import { TextractClient, AnalyzeDocumentCommand } from "@aws-sdk/client-textract";
+import { v4 as uuidv4 } from 'uuid';
+
+function generateCandidateID() {
+  return `C_${uuidv4()}`;
+}
 
 export async function extractTextFromS3(bucketname, filename) {
   const params = {
@@ -29,8 +34,10 @@ export function cleanLines(lines) {
 
 export function extractFieldsFromText(lines) {
   const text = lines.join(' ');
+
   return {
-    name: lines[0], // assumes name is first line
+    candidateID: generateCandidateID(),
+    name: lines[0], // assume name is first line
     email: text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}/)?.[0] || null,
     phone: text.match(/(?:\+?\d{1,3})?\s?(?:\(?\d{2,4}\)?\s?)?\d{3,4}[-\s]?\d{4}/)?.[0] || null,
     skills: extractSkills(lines),

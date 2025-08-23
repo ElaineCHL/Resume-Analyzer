@@ -2,12 +2,12 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 export const generatePresignedUrl = async (req, res) => {
-  const { filename, fileType } = req.query;
-  
+  const { filename, fileType, jobId } = req.query;
+
   const region = process.env.AWS_REGION;
   const bucket_name = process.env.AWS_S3_BUCKET;
   
-  const s3 = new S3Client({ region: region });
+  const s3 = new S3Client({ region });
 
   if (!filename && !fileType) {
     return res.status(400).json({
@@ -31,8 +31,8 @@ export const generatePresignedUrl = async (req, res) => {
       Bucket: bucket_name,
       Key: filename,
       ContentType: fileType,
+      Metadata: { jobid: jobId }, // metadata keys must be lowercase
     };
-
     const command = new PutObjectCommand(params);
     const url = await getSignedUrl(s3, command, { expiresIn: 60 });
 

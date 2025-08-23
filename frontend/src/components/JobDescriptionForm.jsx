@@ -1,17 +1,27 @@
 import { useState } from "react";
+import toast from 'react-hot-toast';
+import api from '../lib/axios.js';
 
-const JobDescriptionForm = () => {
+const JobDescriptionForm = ({ onJobCreated }) => {
   const [jobTitle, setJobTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Job Title:", jobTitle);
-    console.log("Description:", description);
-    // TODO: add POST request logic
-    alert(`Job submitted successfully!\n${jobTitle}\n${description}`);
-    setJobTitle("");
-    setDescription("");
+    try {
+      setLoading(true);
+      const res = await api.post("/jobs", { jobTitle, description });
+      const jobId = res.data.jobID;
+      onJobCreated(jobId);
+      setJobTitle("");
+      setDescription("");
+      toast.success(<div>Job <strong>{jobTitle}</strong> created successfully!</div>);
+    } catch (err) {
+      toast.error("Error creating job: " + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -42,8 +52,15 @@ const JobDescriptionForm = () => {
           ></textarea>
         </div>
 
-        <button type="submit" className="btn btn-primary w-100">
-          Submit
+        <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+          {loading ? (
+            <>
+              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Submitting...
+            </>
+          ) : (
+            "Submit"
+          )}
         </button>
       </form>
     </div>

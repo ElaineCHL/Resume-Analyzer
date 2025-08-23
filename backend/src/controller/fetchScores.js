@@ -28,11 +28,17 @@ export const fetchScores = async (req, res) => {
   try {
     const data = await docClient.send(new QueryCommand(params));
 
+
     // separate candidates and job record
     const jobItem = data.Items.find(item => item.SK === "JOB");
     const candidates = data.Items
       .filter(item => item.SK.startsWith("CANDIDATE#"))
       .sort((a, b) => b.score - a.score);
+
+    // check if job record exists
+    if (!jobItem) {
+      return res.status(404).json({ error: `Job with ID ${jobId} not found.` });
+    }
 
     const response = {
       jobID: jobId,

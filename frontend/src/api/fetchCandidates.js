@@ -2,7 +2,6 @@ import api from '../lib/axios.js';
 
 export async function fetchCandidates(jobId) {
   try {
-    console.log(jobId);
     const res = await api.get(`/jobs/${jobId}`);
     return res.data;
   } catch (err) {

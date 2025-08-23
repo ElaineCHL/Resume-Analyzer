@@ -1,5 +1,5 @@
 import path from "path";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { extractTextFromS3, cleanLines, extractFieldsFromText } from './handler.mjs';
 
 const s3 = new S3Client({});
@@ -16,10 +16,25 @@ export const handler = async (event) => {
 
     console.debug(`Bucket: ${bucketname} | Key: ${filename}`);
 
+    // Get the object from S3 including metadata
+    const s3Object = await s3.send(new GetObjectCommand({
+      Bucket: bucketname,
+      Key: filename,
+    }));
+
+    const metadata = s3Object.Metadata || {};
+    console.debug("Metadata:", metadata);
+
     const rawText = await extractTextFromS3(bucketname, filename);
     const cleaned = cleanLines(rawText);
     const structured = extractFieldsFromText(cleaned);
-    const result = { filename, data: structured };
+
+    // Combine structured data with metadata
+    const result = {
+      filename,
+      metadata,       // include metadata
+      data: structured
+    };
 
     console.debug("Extracted text:", structured);
 
@@ -32,7 +47,8 @@ export const handler = async (event) => {
       new PutObjectCommand({
         Bucket: bucketname,
         Key: outputKey,
-        Body: JSON.stringify(structured, null, 2),
+        Body: JSON.stringify(result, null, 2),
+        Metadata: metadata // optional: copy metadata to the output file too
       })
     );
 

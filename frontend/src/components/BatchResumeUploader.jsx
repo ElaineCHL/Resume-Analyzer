@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { Modal, Button } from "react-bootstrap"; // install bootstrap + react-bootstrap
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import Util from '../lib/utils.js';
@@ -15,11 +16,12 @@ const ALLOWED_TYPES = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ];
 
-const BatchResumeUploader = () => {
+const BatchResumeUploader = ({ jobId }) => {
   const [resumes, setResumes] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState({});
   const [error, setError] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   const handleFileChange = useCallback((e) => {
     const files = Array.from(e.target.files);
@@ -40,6 +42,11 @@ const BatchResumeUploader = () => {
   }, []);
 
   const handleUpload = async () => {
+    if (!jobId) {
+      setShowModal(true);
+      return;
+    }
+
     if (resumes.length === 0) return;
     setUploading(true);
     const newStatus = {};
@@ -57,7 +64,7 @@ const BatchResumeUploader = () => {
           pdfBlob = await convertDocToPdf(file);
           uploadName = uploadName.replace(/\.(docx?|DOCX?)$/, '.pdf');
         }
-        const url = await getPresignedUrl(uploadName, pdfBlob.type);
+        const url = await getPresignedUrl(uploadName, pdfBlob.type, jobId);
         await uploadToS3(url, pdfBlob, pdfBlob.type);
 
         newStatus[fileKey] = 'Uploaded';
@@ -114,6 +121,21 @@ const BatchResumeUploader = () => {
 
   return (
     <div>
+      {showModal && (
+        <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Job Required</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            ⚠️ Please create a job first before uploading resumes.
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="primary" onClick={() => setShowModal(false)}>
+              OK
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
       {!Util.isEmptyString(error) && (
         <div className="alert alert-danger mt-2" role="alert">
           {error}

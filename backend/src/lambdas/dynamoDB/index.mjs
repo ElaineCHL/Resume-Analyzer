@@ -1,8 +1,5 @@
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
-import { S3RequestPresigner } from "@aws-sdk/s3-request-presigner";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { Readable } from "stream";
 
 const s3 = new S3Client({});
 const dynamoDB = new DynamoDBClient({});
@@ -25,14 +22,28 @@ export const handler = async (event) => {
     const bucket = fileObj.s3.bucket.name;
     const key = decodeURIComponent(fileObj.s3.object.key.replace(/\+/g, " "));
 
-    console.log(`Scoring file: s3://${bucket}/${key}`);
+    console.log(`Processing file: s3://${bucket}/${key}`);
 
-    // Get structured JSON from S3
-    const data = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
-    const bodyString = await streamToString(data.Body);
+    // Get object from S3
+    const s3Object = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+
+    // Extract jobId from metadata
+    const jobId = s3Object.Metadata?.jobid;
+    if (!jobId) {
+      throw new Error("No jobId found in S3 metadata");
+    }
+
+    // Parse the JSON content
+    const bodyString = await streamToString(s3Object.Body);
     const structured = JSON.parse(bodyString);
 
-    console.debug("Structured:", structured);
+    console.debug("Structured", structured);
+
+    // Extract candidate info
+    const { data, metadata } = structured;
+    if (!data) {
+      throw new Error("No candidate data found in file");
+    }
 
     const {
       candidateID,
@@ -42,9 +53,13 @@ export const handler = async (event) => {
       skills = [],
       education = [],
       experience = [],
-    } = structured;
+    } = data;
 
-    // Keyword Matching
+    if (!candidateID) {
+      throw new Error("CandidateID missing in structured data");
+    }
+
+    // Calculate score based on REQUIRED skills
     let matched = [];
     let score = 0;
     REQUIRED.forEach((keyword) => {
@@ -54,44 +69,34 @@ export const handler = async (event) => {
       }
     });
 
-    const result = {
-      JobID: "JD12345", // TODO: make dynamic
-      CandidateID: candidateID,
-      Name: name || "Unknown",
-      Email: email || "N/A",
-      Phone: phone || "N/A",
-      Skills: skills,
-      Education: education,
-      Experience: experience,
-      Score: score,
-      MatchedCriteria: matched,
+    // Build DynamoDB item
+    const item = {
+      jobID: { S: jobId },
+      SK: { S: `CANDIDATE#${candidateID}` },
+      name: { S: name || "Unknown" },
+      email: { S: email || "N/A" },
+      phone: { S: phone || "N/A" },
+      score: { N: score.toString() },
+      skills: { S: JSON.stringify(skills) },
+      education: { S: JSON.stringify(education) },
+      experience: { S: JSON.stringify(experience) },
+      matchedCriteria: { S: JSON.stringify(matched) },
+      createdAt: { S: new Date().toISOString() },
     };
-
 
     // Save to DynamoDB
     await dynamoDB.send(
       new PutItemCommand({
         TableName: "JobCandidates",
-        Item: {
-          jobID: { S: result.JobID },
-          sortKey: { S: `${result.Score}#${result.CandidateID}` },
-          candidateID: { S: result.CandidateID },
-          name: { S: result.Name },
-          email: { S: result.Email },
-          phone: { S: result.Phone },
-          score: { N: result.Score.toString() },
-          skills: { S: JSON.stringify(result.Skills) },
-          education: { S: JSON.stringify(result.Education) },
-          experience: { S: JSON.stringify(result.Experience) },
-          matchedCriteria: { S: JSON.stringify(result.MatchedCriteria) },
-        },
+        Item: item,
       })
     );
-    console.debug("Saved to DynamoDB");
 
-    return { statusCode: 200, body: "Scoring complete." };
+    console.log("Candidate saved to DynamoDB:", candidateID);
+
+    return { statusCode: 200, body: "Scoring and save complete." };
   } catch (err) {
-    console.error("Error scoring candidate:", err);
-    return { statusCode: 500, body: "Error in scoring-lambda" };
+    console.error("Error processing candidate:", err);
+    return { statusCode: 500, body: `Error: ${err.message}` };
   }
 };

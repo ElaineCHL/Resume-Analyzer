@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useParams } from 'react-router-dom';
 import { fetchCandidates } from "../api/fetchCandidates.js";
 
-const JobDetailsPage = ({ jobId = "JD12345" }) => {
+const JobDetailsPage = () => {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const { jobId } = useParams();
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -40,10 +42,11 @@ const JobDetailsPage = ({ jobId = "JD12345" }) => {
     <div className="container mt-5">
       <div className="card shadow-sm">
         <div className="card-body">
-          <h3 className="card-title">{job.title}</h3>
+          <h3 className="card-title text-center">{job.title}</h3>
+          <div className="p-3 my-3 bg-light border-start border-primary border-4 rounded">
+            <p className="mb-0 text-dark">{job.description}</p>
+          </div>
           <p className="text-muted">Job ID: {job.jobID}</p>
-
-          <h5 className="mt-4">Candidate Rankings</h5>
 
           <table className="table table-hover mt-3">
             <thead className="table-light">

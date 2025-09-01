@@ -4,7 +4,7 @@ const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5001
 
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 5000,
+  timeout: 60000,
 })
 
 export default api;

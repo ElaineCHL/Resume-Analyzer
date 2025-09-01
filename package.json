@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/ElaineCHL/AI-Powered-Resume-Analyzer/issues"
   },
-  "homepage": "https://github.com/ElaineCHL/AI-Powered-Resume-Analyzer#readme"
+  "homepage": "https://github.com/ElaineCHL/AI-Powered-Resume-Analyzer#readme",
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.879.0"
+  }
 }

@@ -1,4 +1,4 @@
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 
 const s3 = new S3Client({});
@@ -69,6 +69,19 @@ export const handler = async (event) => {
       }
     });
 
+    // Create new S3 key for output file
+    const outputKey = `output/${key.split('/').pop()}`;
+
+    // Save structured data to S3
+    await s3.send(
+        new PutObjectCommand({
+            Bucket: bucket,
+            Key: outputKey,
+            Body: JSON.stringify(structured),
+            ContentType: 'application/json'
+        })
+    );
+    
     // Build DynamoDB item
     const item = {
       jobID: { S: jobId },
@@ -81,7 +94,9 @@ export const handler = async (event) => {
       education: { S: JSON.stringify(education) },
       experience: { S: JSON.stringify(experience) },
       matchedCriteria: { S: JSON.stringify(matched) },
-      createdAt: { S: new Date().toISOString() },
+      bucket: { S: bucket },  // 1
+      key: { S: key },        // 2
+      createdAt: { S: new Date().toISOString() }
     };
 
     // Save to DynamoDB

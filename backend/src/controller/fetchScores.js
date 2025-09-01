@@ -32,7 +32,7 @@ export const fetchScores = async (req, res) => {
     const jobItem = data.Items.find(item => item.SK === "JOB");
     const candidates = data.Items
       .filter(item => item.SK.startsWith("CANDIDATE#"))
-      .sort((a, b) => b.score - a.score);
+      .sort((a, b) => Number(b.score) - Number(a.score));
 
     const response = {
       jobID: jobId,

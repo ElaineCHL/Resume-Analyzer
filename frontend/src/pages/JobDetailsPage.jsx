@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams } from 'react-router-dom';
+import { useParams } from "react-router-dom";
 import { fetchJobWithCandidates } from "../api/fetchCandidates.js";
 
 const JobDetailsPage = () => {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [resumeSummary, setResumeSummary] = useState("");
+  const [showModal, setShowModal] = useState(false);
 
   const { jobId } = useParams();
   useEffect(() => {
@@ -20,6 +22,15 @@ const JobDetailsPage = () => {
     };
     loadData();
   }, [jobId]);
+
+  const handleViewSummary = async (summary) => {
+    try {
+      setShowModal(true);
+      setResumeSummary(summary);
+    } catch (err) {
+      console.error("Failed to fetch resume summary:", err);
+    }
+  };
 
   if (loading) {
     return (
@@ -64,11 +75,12 @@ const JobDetailsPage = () => {
                 <th scope="col">Email</th>
                 <th scope="col">Score</th>
                 <th scope="col">Matched Criteria</th>
+                <th scope="col">Summary</th>
+                <th scope="col">Resume</th>
               </tr>
             </thead>
             <tbody>
               {job.candidateList.items.map((c, idx) => {
-                // Parse matchedCriteria if it's a stringified array
                 let skills = [];
                 try {
                   skills =
@@ -100,6 +112,30 @@ const JobDetailsPage = () => {
                         <span className="text-muted">N/A</span>
                       )}
                     </td>
+                    <td>
+                      <button
+                        className="btn btn-sm btn-outline-info"
+                        onClick={() => handleViewSummary(c.summary)}
+                      >
+                        View Summary
+                      </button>
+                    </td>
+                    <td>
+                      <button
+                        className="btn btn-sm btn-primary"
+                        onClick={() => {
+                          if (!c.resumePath) {
+                            console.error("No filename found for candidate:", c);
+                            return;
+                          }
+
+                          const encodedKey = c.resumePath.split("/").map(encodeURIComponent).join("/");
+                          const url = `${import.meta.env.VITE_RESUME_S3_BASE_URL}/${encodedKey}`;
+                          window.open(url, "_blank");
+                        }}                      >
+                        View Resume
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
@@ -111,6 +147,29 @@ const JobDetailsPage = () => {
           </a>
         </div>
       </div>
+
+      {showModal && (
+        <div className="modal show" style={{ display: "block" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Resume Summary</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div style={{ whiteSpace: "pre-wrap" }}>
+                  {resumeSummary}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

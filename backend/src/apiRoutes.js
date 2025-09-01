@@ -1,5 +1,4 @@
-import * as fs from 'fs';
-import express from "express"
+import express from "express";
 import multer from 'multer';
 import Util from "./utils.js";
 import { generatePresignedUrl } from "./controller/getPresignedUrl.js";

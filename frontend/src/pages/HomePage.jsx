@@ -3,7 +3,7 @@ import BatchResumeUploader from "../components/BatchResumeUploader.jsx";
 import JobDescriptionForm from "../components/JobDescriptionForm.jsx";
 
 const HomePage = () => {
-  const [jobId, setJobId] = useState(null);
+  const [jobData, setJobData] = useState(null);
 
   return (
     <div className="container mt-4 min-vh-100">
@@ -12,7 +12,7 @@ const HomePage = () => {
           <div className="card shadow-sm">
             <div className="card-body">
               {/* Pass setter to JobDescriptionForm */}
-              <JobDescriptionForm onJobCreated={setJobId} />
+              <JobDescriptionForm onJobCreated={setJobData} />
             </div>
           </div>
         </div>
@@ -20,7 +20,7 @@ const HomePage = () => {
           <div className="card shadow-sm">
             <div className="card-body">
               {/* Pass jobId to BatchResumeUploader */}
-              <BatchResumeUploader jobId={jobId} />
+              <BatchResumeUploader jobData={jobData} />
             </div>
           </div>
         </div>

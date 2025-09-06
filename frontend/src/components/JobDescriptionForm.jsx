@@ -1,10 +1,10 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
-import api from "../lib/axios.js";
+import { apiGateway } from "../lib/axios.js";
 
 const JobDescriptionForm = ({ onJobCreated }) => {
   const [jobTitle, setJobTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
   const [skills, setSkills] = useState([]);
   const [skillInput, setSkillInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,11 +25,11 @@ const JobDescriptionForm = ({ onJobCreated }) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const res = await api.post("/jobs", { jobTitle, description, skills });
-      const jobId = res.data.jobID;
-      onJobCreated(jobId);
+      const res = await apiGateway.post("/jobs", { jobTitle, jobDescription, keyword: skills });
+      const jobData = res.data.item;
+      onJobCreated(jobData);
       setJobTitle("");
-      setDescription("");
+      setJobDescription("");
       setSkills([]);
       toast.success(
         <div>
@@ -67,8 +67,8 @@ const JobDescriptionForm = ({ onJobCreated }) => {
             className="form-control"
             placeholder="Job responsibilities, requirements, etc."
             rows="4"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
             required
           ></textarea>
         </div>

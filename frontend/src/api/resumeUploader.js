@@ -1,10 +1,10 @@
-import api from '../lib/axios.js';
+import { apiGateway, backend } from '../lib/axios.js';
 
 export async function convertDocToPdf(file) {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await api.post('/convert-doc-to-pdf', formData, {
+  const response = await apiGateway.post('/convert-doc-to-pdf', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     responseType: 'blob',
     validateStatus: () => true,
@@ -19,9 +19,9 @@ export async function convertDocToPdf(file) {
   return new Blob([response.data], { type: 'application/pdf' });
 }
 
-export async function getPresignedUrl(filename, fileType, jobId) {
-  const { data } = await api.get('/get-presigned-url', {
-    params: { filename, fileType, jobId },
+export async function getPresignedUrl(filename, fileType, jobData) {
+  const { data } = await backend.get('/get-presigned-url', {
+    params: { filename, fileType, jobData },
   });
 
   if (!data.url) {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
-import { fetchCandidates } from "../api/fetchCandidates.js";
+import { fetchJobWithCandidates } from "../api/fetchCandidates.js";
 
 const JobDetailsPage = () => {
   const [job, setJob] = useState(null);
@@ -10,7 +10,7 @@ const JobDetailsPage = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await fetchCandidates(jobId);
+        const data = await fetchJobWithCandidates(jobId);
         setJob(data);
       } catch (err) {
         console.error("Failed to fetch rankings:", err);
@@ -37,16 +37,24 @@ const JobDetailsPage = () => {
       </div>
     );
   }
+  const { jobTitle, jobDescription, jobSkills } = job.job;
 
   return (
     <div className="container mt-5">
       <div className="card shadow-sm">
         <div className="card-body">
-          <h3 className="card-title text-center">{job.title}</h3>
+          <h3 className="card-title text-center">{jobTitle}</h3>
+          <p className="text-muted">Job ID: {jobId}</p>
           <div className="p-3 my-3 bg-light border-start border-primary border-4 rounded">
-            <p className="mb-0 text-dark">{job.description}</p>
+            <p className="mb-0 text-dark">{jobDescription}</p>
           </div>
-          <p className="text-muted">Job ID: {job.jobID}</p>
+          <div className="mb-0">
+            Required Skills: {jobSkills.map((skill, idx) => (
+              <span key={idx} className="badge bg-primary me-1">
+                {skill}
+              </span>
+            ))}
+          </div>
 
           <table className="table table-hover mt-3">
             <thead className="table-light">
@@ -59,7 +67,7 @@ const JobDetailsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {job.candidates.map((c, idx) => {
+              {job.candidateList.items.map((c, idx) => {
                 // Parse matchedCriteria if it's a stringified array
                 let skills = [];
                 try {

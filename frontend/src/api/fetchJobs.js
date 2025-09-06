@@ -1,11 +1,11 @@
-import api from '../lib/axios.js';
+import { apiGateway } from '../lib/axios.js';
 
-export async function fetchJobs() {
+export async function fetchAllJobs() {
   try {
-    const res = await api.get(`/jobs`);
-    return res.data;
+    const res = await apiGateway.get(`/jobs`);
+    return res.data.jobs.items;
   } catch (err) {
     console.error("Error fetching jobs:", err.response?.data || err.message);
-    throw err; // bubble up so frontend sees 500 properly
+    throw err;
   }
 }

@@ -16,7 +16,7 @@ const ALLOWED_TYPES = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 ];
 
-const BatchResumeUploader = ({ jobId }) => {
+const BatchResumeUploader = ({ jobData }) => {
   const [resumes, setResumes] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState({});
@@ -42,7 +42,7 @@ const BatchResumeUploader = ({ jobId }) => {
   }, []);
 
   const handleUpload = async () => {
-    if (!jobId) {
+    if (!jobData) {
       setShowModal(true);
       return;
     }
@@ -64,7 +64,7 @@ const BatchResumeUploader = ({ jobId }) => {
           pdfBlob = await convertDocToPdf(file);
           uploadName = uploadName.replace(/\.(docx?|DOCX?)$/, '.pdf');
         }
-        const url = await getPresignedUrl(uploadName, pdfBlob.type, jobId);
+        const url = await getPresignedUrl(uploadName, pdfBlob.type, JSON.stringify(jobData));
         await uploadToS3(url, pdfBlob, pdfBlob.type);
 
         newStatus[fileKey] = 'Uploaded';

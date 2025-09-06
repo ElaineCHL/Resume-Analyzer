@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import toast from 'react-hot-toast';
-import { fetchCandidates } from '../api/fetchCandidates.js';
-import { fetchJobs } from '../api/fetchJobs.js';
+import { fetchTopCandidates } from '../api/fetchCandidates.js';
+import { fetchAllJobs } from '../api/fetchJobs.js';
 
 const JobPage = () => {
   const [jobs, setJobs] = useState(null);
@@ -10,17 +10,17 @@ const JobPage = () => {
   useEffect(() => {
     const loadCandidates = async () => {
       try {
-        const jobsList = await fetchJobs();
+        const jobsList = await fetchAllJobs();
         const jobsWithCandidates = [];
 
         for (const job of jobsList) {
-          const res = await fetchCandidates(job.jobID);
-          jobsWithCandidates.push({ ...job, candidates: res.candidates });
+          const candidates = await fetchTopCandidates(job.jobID, 3);
+          jobsWithCandidates.push({ ...job, candidates });
         }
         setJobs(jobsWithCandidates);
       } catch (err) {
         toast.error("Failed to load candidates", err);
-        setJobs([]); // fallback
+        setJobs([]);
       } finally {
         setLoading(false);
       }

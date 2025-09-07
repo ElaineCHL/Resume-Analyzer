@@ -50,7 +50,7 @@ const JobPage = () => {
     try {
       const res = await deleteJob(selectedJob.jobID);
       const deletedJob = res.deletedJob;
-      toast.success(<span>Job <b>${deletedJob.jobTitle}</b> deleted successfully.</span>);
+      toast.success(<span>Job <b>{deletedJob.jobTitle}</b> deleted successfully.</span>);
       setJobs((prevJobs) => prevJobs.filter((j) => j.jobID !== selectedJob.jobID));
       setShowModal(false);
       setSelectedJob(null);

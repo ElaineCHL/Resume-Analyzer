@@ -2,17 +2,22 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { apiGateway } from "../lib/axios.js";
 
-const JobDescriptionForm = ({ onJobCreated }) => {
+const JobForm = ({ onJobCreated }) => {
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [skills, setSkills] = useState([]);
   const [skillInput, setSkillInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleAddSkill = (e) => {
-    e.preventDefault();
-    if (skillInput.trim() && !skills.includes(skillInput.trim())) {
-      setSkills([...skills, skillInput.trim()]);
+  const handleAddSkill = () => {
+    if (!skillInput) return;
+    const newSkills = skillInput
+      .split(',')
+      .map(skill => skill.trim())
+      .filter(skill => skill && !skills.includes(skill));
+
+    if (newSkills.length > 0) {
+      setSkills([...skills, ...newSkills]);
       setSkillInput("");
     }
   };
@@ -83,6 +88,13 @@ const JobDescriptionForm = ({ onJobCreated }) => {
               placeholder="e.g., SQL, JavaScript, React,..."
               value={skillInput}
               onChange={(e) => setSkillInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddSkill();
+                }
+              }}
+              required
             />
             <button
               className="btn btn-outline-secondary"
@@ -132,4 +144,4 @@ const JobDescriptionForm = ({ onJobCreated }) => {
   );
 };
 
-export default JobDescriptionForm;
+export default JobForm;

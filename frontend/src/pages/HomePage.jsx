@@ -1,6 +1,6 @@
 import { useState } from "react";
 import BatchResumeUploader from "../components/BatchResumeUploader.jsx";
-import JobDescriptionForm from "../components/JobDescriptionForm.jsx";
+import JobForm from "../components/JobForm.jsx";
 
 const HomePage = () => {
   const [jobData, setJobData] = useState(null);
@@ -11,8 +11,8 @@ const HomePage = () => {
         <div className="col-md-6 mb-5">
           <div className="card shadow-sm">
             <div className="card-body">
-              {/* Pass setter to JobDescriptionForm */}
-              <JobDescriptionForm onJobCreated={setJobData} />
+              {/* Pass setter to JobForm */}
+              <JobForm onJobCreated={setJobData} />
             </div>
           </div>
         </div>

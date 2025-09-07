@@ -50,7 +50,6 @@ const JobPage = () => {
     try {
       const res = await deleteJob(selectedJob.jobID);
       const deletedJob = res.deletedJob;
-      
       toast.success(`Job ${deletedJob.jobTitle} deleted successfully.`);
       setJobs((prevJobs) => prevJobs.filter((j) => j.jobID !== selectedJob.jobID));
       setShowModal(false);
@@ -90,18 +89,14 @@ const JobPage = () => {
       {showModal && (
         <Modal show={showModal} onHide={() => setShowModal(false)} centered>
           <Modal.Header closeButton>
-            <Modal.Title>Job Required</Modal.Title>
+            <Modal.Title>Confirm Delete</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             Are you sure you want to delete Job <b>{selectedJob.jobTitle}</b>?
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>
-              Cancel
-            </Button>
-            <Button variant="danger" onClick={confirmDelete}>
-              Delete
-            </Button>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+            <Button variant="danger" onClick={confirmDelete}>Delete</Button>
           </Modal.Footer>
         </Modal>
       )}

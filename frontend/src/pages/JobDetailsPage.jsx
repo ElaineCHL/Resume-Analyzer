@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Modal, Button } from "react-bootstrap";
 import { fetchJobWithCandidates } from "../api/fetchCandidates.js";
 
 const JobDetailsPage = () => {
@@ -151,26 +152,26 @@ const JobDetailsPage = () => {
       </div>
 
       {showModal && (
-        <div className="modal show" style={{ display: "block" }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Resume Summary</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <div style={{ whiteSpace: "pre-wrap" }}>
-                  {resumeSummary}
-                </div>
-              </div>
-
+        <Modal show={showModal} onHide={() => setShowModal(false)} centered size="xl">
+          <Modal.Header closeButton>
+            <Modal.Title>Resume Summary</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="overflow-auto">
+            <div
+              style={{
+                maxHeight: "400px",
+                whiteSpace: "pre-wrap"
+              }}
+            >
+              {resumeSummary}
             </div>
-          </div>
-        </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="danger" onClick={() => setShowModal(false)}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       )}
     </div>
   );

@@ -57,7 +57,9 @@ const JobDetailsPage = () => {
           <h3 className="card-title text-center">{jobTitle}</h3>
           <p className="text-muted">Job ID: {jobId}</p>
           <div className="p-3 my-3 bg-light border-start border-primary border-4 rounded">
-            <p className="mb-0 text-dark">{jobDescription}</p>
+            <div style={{ whiteSpace: "pre-wrap" }}>
+              {jobDescription}
+            </div>
           </div>
           <div className="mb-0">
             Required Skills: {jobSkills.map((skill, idx) => (

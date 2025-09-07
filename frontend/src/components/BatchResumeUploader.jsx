@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Modal, Button } from "react-bootstrap"; // install bootstrap + react-bootstrap
+import { Modal, Button } from "react-bootstrap";
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import Util from '../lib/utils.js';

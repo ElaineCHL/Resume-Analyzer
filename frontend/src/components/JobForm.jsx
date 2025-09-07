@@ -28,6 +28,10 @@ const JobForm = ({ onJobCreated }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (skills.length === 0) {
+      toast.error("Please enter skills");
+      return;
+    }
     try {
       setLoading(true);
       const res = await apiGateway.post("/jobs", { jobTitle, jobDescription, keyword: skills });
@@ -94,7 +98,6 @@ const JobForm = ({ onJobCreated }) => {
                   handleAddSkill();
                 }
               }}
-              required
             />
             <button
               className="btn btn-outline-secondary"

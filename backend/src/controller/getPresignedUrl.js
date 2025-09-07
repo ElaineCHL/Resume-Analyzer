@@ -31,7 +31,7 @@ export const generatePresignedUrl = async (req, res) => {
       Bucket: bucket_name,
       Key: filename,
       ContentType: fileType,
-      Metadata: { job_data: jobData }, // metadata keys must be lowercase
+      Metadata: { job_data: JSON.stringify(jobData) }, // metadata keys must be lowercase
     };
     const command = new PutObjectCommand(params);
     const url = await getSignedUrl(s3, command, { expiresIn: 60 });

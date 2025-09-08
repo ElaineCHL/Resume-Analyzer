@@ -54,7 +54,7 @@ const JobForm = ({ onJobCreated }) => {
 
   return (
     <div>
-      <h3 className="mb-4">Post Job Opening</h3>
+      <h3 className="mb-4">Job Requirements Entry</h3>
       <form onSubmit={handleSubmit}>
         {/* Job Title */}
         <div className="mb-3">

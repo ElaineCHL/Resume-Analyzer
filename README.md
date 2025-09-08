@@ -93,7 +93,7 @@ table called **`JobCandidates`** , using a **single-table design**.
 | Attribute           | Type              | Description                                                      |
 | ------------------- | ----------------- | ---------------------------------------------------------------- |
 | `jobID`           | String (PK)       | Job which this candidate applied for.                            |
-| `SK`              | String (SK)       | Format:`CANDIDATE#<candidateId>`<br />Example: `C_mf9dy5zo` |
+| `SK`              | String (SK)       | Format:`CANDIDATE#<candidateId>`<br />Example: `CANDIDATE#C_mf9dy5zo` |
 | `name`            | String            | Candidate' s full name                                           |
 | `email`           | String            | Candidate' s email                                               |
 | `phone`           | String            | Candidate' s phone number                                        |

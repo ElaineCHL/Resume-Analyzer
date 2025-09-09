@@ -163,7 +163,7 @@ candidates, e.g. `/jobs/123?limit=3`.
 
 ## ▶️ Running the App
 
-- Visit app [here](http://ec2-54-179-123-73.ap-southeast-1.compute.amazonaws.com).
+- Visit app [here](http://ec2-47-129-162-232.ap-southeast-1.compute.amazonaws.com/job).
 - Add a new job posting.
 - Upload resumes.
 - Resumes will be analyzed automatically.

@@ -69,7 +69,7 @@ const JobPage = () => {
             role="status"
             aria-hidden="true"
           ></span>
-          Uploading...
+          Loading Jobs...
         </div>
       </div>
     );

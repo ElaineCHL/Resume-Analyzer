@@ -20,9 +20,7 @@ export async function convertDocToPdf(file) {
 }
 
 export async function getPresignedUrl(filename, fileType, jobData) {
-  const { data } = await backend.get('/get-presigned-url', {
-    params: { filename, fileType, jobData },
-  });
+  const { data } = await apiGateway.post('/generate-presigned-url', { filename, fileType, jobData });
 
   if (!data.url) {
     throw new Error('Failed to get pre-signed URL');
